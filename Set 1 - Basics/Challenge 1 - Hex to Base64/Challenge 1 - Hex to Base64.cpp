@@ -7,8 +7,6 @@
 #include <iostream>
 using std::cout;
 using std::endl;
-#include <string>
-using std::string;
 
 #define HEX_CHUNK_SIZE 6
 #define BINARY_CHUNK_SIZE 24
@@ -90,8 +88,7 @@ void hexToBase64(char *hexVals, char *base64Vals, int size)
 }
 
 /******************************************************************************
-* Converts HEX_CHUNK_SIZE hex characters at a time to binary. Uses switch stmnt
-* for now, plan to change in the future.
+* Converts HEX_CHUNK_SIZE hex characters at a time to binary.
 *
 * hexChunk - char array containing HEX_CHUNK_SIZE characters from the hex string
 * binaryChunk - char array where binary representation of the hexChunk are stored
