@@ -1,5 +1,5 @@
 # Cryptopals-Challenges
-These are my solutions to the cryptography challenges from https://cryptopals.com/.
+These are my solutions to the challenges from https://cryptopals.com/.
 
 ## Set 1
 - [X] Convert hex to base64
