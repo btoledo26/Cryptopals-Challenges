@@ -8,8 +8,8 @@
 using std::cout;
 using std::endl;
 
-#define HEX_CHUNK_SIZE 6
-#define BINARY_CHUNK_SIZE HEX_CHUNK_SIZE * 4
+#define HEX_CHUNK_SIZE 24
+#define BINARY_CHUNK_SIZE HEX_CHUNK_SIZE * 4 //should be divisible by 6
 
 static const char *const BASE_64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; //constant pointer to constant char, neither to be modified
 
@@ -58,7 +58,7 @@ size_t getResultLength(size_t hexBytes)
     size_t remainder = size % 4;
     if(remainder != 0) size += (4 - remainder);
 
-    return size;
+    return size/2;
 }
 
 /******************************************************************************
