@@ -162,8 +162,6 @@ void binaryToBase64(char *binaryChunk, char *base64Vals, size_t *index)
 
     if (BINARY_CHUNK_SIZE - characters > 0) //add padding chars if needed
     {
-        int a = (BINARY_CHUNK_SIZE - characters);
-        int b = (BINARY_CHUNK_SIZE - characters) / 6;
         for(int i = 0; i < (BINARY_CHUNK_SIZE - characters) / 6; i++)
             base64Vals[(*index)++] = '=';
     }
