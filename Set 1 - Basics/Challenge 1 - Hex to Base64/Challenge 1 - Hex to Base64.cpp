@@ -8,14 +8,14 @@
 using std::cout;
 using std::endl;
 
-#define HEX_CHUNK_SIZE 24
-#define BINARY_CHUNK_SIZE HEX_CHUNK_SIZE * 4 //should be divisible by 6
+#define HEX_CHUNK_SIZE 6
+#define BINARY_CHUNK_SIZE 24
 
 static const char *const BASE_64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; //constant pointer to constant char, neither to be modified
 
 size_t getResultLength(size_t hexBytes);
-void hexToBase64(char *hexVals, char *base64Vals, int size);
-void hexToBinary(char *hexChunk, char *binaryChunk);
+void hexToBase64(char *hexVals, char *base64Vals, int hexLength);
+void hexToBinary(char *hexChunk, char *binaryChunk, int hexChunkSize);
 void binaryToBase64(char* binaryChunk, char *base64Vals, size_t *index);
 
 int main()
@@ -24,6 +24,7 @@ int main()
     size_t hexLength = sizeof(hexChars) / sizeof(char) - 1;
     if(hexLength % 2 != 0)
     {
+        cout << "Hex input length must be divisible by 2" << endl;
         return -1;
     }
 
@@ -55,10 +56,11 @@ int main()
 size_t getResultLength(size_t hexBytes)
 {
     size_t size = (hexBytes * 4 + 2) / 3;
+    size /= 2;
     size_t remainder = size % 4;
-    if(remainder != 0) size += (4 - remainder);
+    if (remainder != 0) size += (4 - remainder);
 
-    return size/2;
+    return size;
 }
 
 /******************************************************************************
@@ -72,17 +74,29 @@ size_t getResultLength(size_t hexBytes)
 * size - the size of the array containing the original hex string
 * 
 ******************************************************************************/
-void hexToBase64(char *hexVals, char *base64Vals, int size)
+void hexToBase64(char *hexVals, char *base64Vals, int hexLength)
 {
     char hexChunk[HEX_CHUNK_SIZE + 1] = "";
     char binaryChunk[BINARY_CHUNK_SIZE + 1] = "";
+    int remainingChars = hexLength;
     size_t encodeIndex = 0;
-    for(int i = 0; i < size; i += HEX_CHUNK_SIZE)
+    for(int i = 0; i < hexLength; i += HEX_CHUNK_SIZE, remainingChars -= HEX_CHUNK_SIZE)
     {
         memset(hexChunk, 0, HEX_CHUNK_SIZE + 1);
         memset(binaryChunk, 0, BINARY_CHUNK_SIZE + 1);
-        memcpy(hexChunk, hexVals + i, HEX_CHUNK_SIZE);
-        hexToBinary(hexChunk, binaryChunk);
+
+        if (remainingChars < 6) //last chunk is a partial chunk
+        {
+            int remainder = remainingChars % 6;
+            memcpy(hexChunk, hexVals + i, remainder);
+            hexToBinary(hexChunk, binaryChunk, remainder);
+        }
+        else
+        {
+            memcpy(hexChunk, hexVals + i, HEX_CHUNK_SIZE);
+            hexToBinary(hexChunk, binaryChunk, HEX_CHUNK_SIZE);
+        }
+
         binaryToBase64(binaryChunk, base64Vals, &encodeIndex);
     }
 }
@@ -92,11 +106,12 @@ void hexToBase64(char *hexVals, char *base64Vals, int size)
 *
 * hexChunk - char array containing HEX_CHUNK_SIZE characters from the hex string
 * binaryChunk - char array where binary representation of the hexChunk are stored
+* hexChunkSize - length of passed in hexChunk
 *
 ******************************************************************************/
-void hexToBinary(char *hexChunk, char *binaryChunk)
+void hexToBinary(char *hexChunk, char *binaryChunk, int hexChunkSize)
 {
-    for (int i = 0, j = 0; i < HEX_CHUNK_SIZE; i++, j+=4)
+    for (int i = 0, j = 0; i < hexChunkSize; i++, j+=4)
     {
         switch (toupper(hexChunk[i]))
         {
@@ -131,7 +146,9 @@ void hexToBinary(char *hexChunk, char *binaryChunk)
 ******************************************************************************/
 void binaryToBase64(char *binaryChunk, char *base64Vals, size_t *index)
 {
-    for (int i = 0; i < BINARY_CHUNK_SIZE; i + 6)
+    int characters = strnlen(binaryChunk, BINARY_CHUNK_SIZE);
+
+    for (int i = 0; i < characters; i + 6)
     {
         size_t total = 0;
         for (int j = 5; j > -1; j--, i++)
@@ -141,5 +158,13 @@ void binaryToBase64(char *binaryChunk, char *base64Vals, size_t *index)
         }
         
         base64Vals[(*index)++] = BASE_64_ALPHABET[total];
+    }
+
+    if (BINARY_CHUNK_SIZE - characters > 0) //add padding chars if needed
+    {
+        int a = (BINARY_CHUNK_SIZE - characters);
+        int b = (BINARY_CHUNK_SIZE - characters) / 6;
+        for(int i = 0; i < (BINARY_CHUNK_SIZE - characters) / 6; i++)
+            base64Vals[(*index)++] = '=';
     }
 }
