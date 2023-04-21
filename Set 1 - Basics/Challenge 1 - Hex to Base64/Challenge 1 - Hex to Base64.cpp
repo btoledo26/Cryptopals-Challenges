@@ -9,14 +9,14 @@ using std::cout;
 using std::endl;
 
 #define HEX_CHUNK_SIZE 6
-#define BINARY_CHUNK_SIZE 24
+#define BINARY_CHUNK_SIZE HEX_CHUNK_SIZE * 4
 
 static const char *const BASE_64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; //constant pointer to constant char, neither to be modified
 
 size_t getResultLength(size_t hexBytes);
 void hexToBase64(char *hexVals, char *base64Vals, int size);
 void hexToBinary(char *hexChunk, char *binaryChunk);
-void binaryToDecimal(char* binaryChunk, char *base64Vals, size_t *index);
+void binaryToBase64(char* binaryChunk, char *base64Vals, size_t *index);
 
 int main()
 {
@@ -62,10 +62,10 @@ size_t getResultLength(size_t hexBytes)
 }
 
 /******************************************************************************
-* Converts hex string to base64 string by converting 3-byte chunks into binary,
-* converting the chunk into binary and storing in a 24-byte array, grouping the
-* array into groups of 6 bytes, and using these sextets' decimal values to look
-* up the corresponding base64 value in the character string defined above.
+* Converts hex string to base64 string by converting hex chunks into binary 
+* and storing in a 24-byte array, grouping the array into groups of 6 bytes, 
+* and using these sextets' decimal values to look up the corresponding base64 
+* value in the character string defined above.
 * 
 * hexVals - char array containing the original hex string
 * base64Vals - the char array to store converted base64 values in
@@ -79,11 +79,11 @@ void hexToBase64(char *hexVals, char *base64Vals, int size)
     size_t encodeIndex = 0;
     for(int i = 0; i < size; i += HEX_CHUNK_SIZE)
     {
-        memset(hexChunk, 0, HEX_CHUNK_SIZE);
-        memset(binaryChunk, 0, BINARY_CHUNK_SIZE);
+        memset(hexChunk, 0, HEX_CHUNK_SIZE + 1);
+        memset(binaryChunk, 0, BINARY_CHUNK_SIZE + 1);
         memcpy(hexChunk, hexVals + i, HEX_CHUNK_SIZE);
         hexToBinary(hexChunk, binaryChunk);
-        binaryToDecimal(binaryChunk, base64Vals, &encodeIndex);
+        binaryToBase64(binaryChunk, base64Vals, &encodeIndex);
     }
 }
 
@@ -129,7 +129,7 @@ void hexToBinary(char *hexChunk, char *binaryChunk)
 * index - pointer to the index of base64Vals
 *
 ******************************************************************************/
-void binaryToDecimal(char *binaryChunk, char *base64Vals, size_t *index)
+void binaryToBase64(char *binaryChunk, char *base64Vals, size_t *index)
 {
     for (int i = 0; i < BINARY_CHUNK_SIZE; i + 6)
     {
