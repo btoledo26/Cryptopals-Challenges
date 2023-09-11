@@ -15,7 +15,7 @@ static const char *const BASE_64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 
 size_t getResultLength(size_t hexBytes);
 void hexToBase64(char *hexVals, char *base64Vals, int hexLength);
-void hexToBinary(char *hexChunk, char *binaryChunk, int hexChunkSize);
+void hexChunkToBinaryChunk(char *hexChunk, char *binaryChunk, int hexChunkSize);
 void binaryToBase64(char* binaryChunk, char *base64Vals, size_t *index);
 
 int main()
@@ -89,12 +89,12 @@ void hexToBase64(char *hexVals, char *base64Vals, int hexLength)
         {
             int remainder = remainingChars % 6;
             memcpy(hexChunk, hexVals + i, remainder);
-            hexToBinary(hexChunk, binaryChunk, remainder);
+            hexChunkToBinaryChunk(hexChunk, binaryChunk, remainder);
         }
         else
         {
             memcpy(hexChunk, hexVals + i, HEX_CHUNK_SIZE);
-            hexToBinary(hexChunk, binaryChunk, HEX_CHUNK_SIZE);
+            hexChunkToBinaryChunk(hexChunk, binaryChunk, HEX_CHUNK_SIZE);
         }
 
         binaryToBase64(binaryChunk, base64Vals, &encodeIndex);
@@ -102,14 +102,15 @@ void hexToBase64(char *hexVals, char *base64Vals, int hexLength)
 }
 
 /******************************************************************************
-* Converts HEX_CHUNK_SIZE hex characters at a time to binary.
+* Converts HEX_CHUNK_SIZE hex characters at a time from hexChunk to binary and 
+* stores them in binaryChunk.
 *
 * hexChunk - char array containing HEX_CHUNK_SIZE characters from the hex string
 * binaryChunk - char array where binary representation of the hexChunk are stored
 * hexChunkSize - length of passed in hexChunk
 *
 ******************************************************************************/
-void hexToBinary(char *hexChunk, char *binaryChunk, int hexChunkSize)
+void hexChunkToBinaryChunk(char *hexChunk, char *binaryChunk, int hexChunkSize)
 {
     for (int i = 0, j = 0; i < hexChunkSize; i++, j+=4)
     {
@@ -147,7 +148,6 @@ void hexToBinary(char *hexChunk, char *binaryChunk, int hexChunkSize)
 void binaryToBase64(char *binaryChunk, char *base64Vals, size_t *index)
 {
     int characters = strnlen(binaryChunk, BINARY_CHUNK_SIZE);
-
     for (int i = 0; i < characters; i + 6)
     {
         size_t total = 0;
