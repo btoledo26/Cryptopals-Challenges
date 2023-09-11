@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Challenge 2 - Fixed XOR", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Challenge 1 - Hex to Base64", "Challenge 1 - Hex to Base64\Challenge 1 - Hex to Base64.vcxproj", "{912ECDC2-FB0E-4292-90A6-3F6D3A67C440}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Challenge 3 - Single-byte XOR cipher", "Challenge 3 - Single-byte XOR cipher\Challenge 3 - Single-byte XOR cipher.vcxproj", "{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{912ECDC2-FB0E-4292-90A6-3F6D3A67C440}.Release|x64.Build.0 = Release|x64
 		{912ECDC2-FB0E-4292-90A6-3F6D3A67C440}.Release|x86.ActiveCfg = Release|Win32
 		{912ECDC2-FB0E-4292-90A6-3F6D3A67C440}.Release|x86.Build.0 = Release|Win32
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Debug|x64.ActiveCfg = Debug|x64
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Debug|x64.Build.0 = Debug|x64
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Debug|x86.ActiveCfg = Debug|Win32
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Debug|x86.Build.0 = Debug|Win32
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Release|x64.ActiveCfg = Release|x64
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Release|x64.Build.0 = Release|x64
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Release|x86.ActiveCfg = Release|Win32
+		{EA4AE63B-15AE-46F2-8D80-F51A87F7D54E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
