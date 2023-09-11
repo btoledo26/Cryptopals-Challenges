@@ -3,7 +3,7 @@ These are my solutions to the challenges from https://cryptopals.com/.
 
 ## Set 1
 - [X] Convert hex to base64
-- [ ] Fixed XOR
+- [X] Fixed XOR
 - [ ] Single-byte XOR cipher
 - [ ] Detect single-character XOR
 - [ ] Implement repeating-key XOR
