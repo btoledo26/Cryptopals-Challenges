@@ -11,26 +11,27 @@ using std::endl;
 using std::map;
 #include <vector>
 using std::vector;
+#include <cmath>
+using std::abs;
 
 #define ALPHABET_LENGTH 26
 #define POSSIBLE_KEYS 256
 
 //https://mathcenter.oxford.emory.edu/site/math125/englishLetterFreqs/
-static const map<char, double> charFrequency = { {'e', 12.702}, {'t', 9.056}, {'a', 8.167}, {'o', 7.507}, {'i', 6.966}, {'n', 6.749},
+static const char *const alphabet = "abcdefghijklmnopqrstuvwxyz";
+static const map<char, double> charFrequencies = { {'e', 12.702}, {'t', 9.056}, {'a', 8.167}, {'o', 7.507}, {'i', 6.966}, {'n', 6.749},
                                                  {'s', 6.327}, {'h', 6.094}, {'r', 5.987}, {'d', 4.253}, {'l', 4.025}, {'c', 2.782},
                                                  {'u', 2.758}, {'m', 2.406}, {'w', 2.360}, {'f', 2.228}, {'g', 2.015}, {'y', 1.974},
                                                  {'p', 1.929}, {'b', 1.492}, {'v', 0.978}, {'k', 0.772}, {'j', 0.153}, {'x', 0.150},
                                                  {'q', 0.095}, {'z', 0.074} };
-static map<char, double> textCharFrequency = {};
-static map<char, double> keyScores = {};
-static const char *const alphabet = "abcdefghijklmnopqrstuvwxyz";
+static map<uint8_t, double> keyScores = {};
 
 uint8_t findCipherKey(const char *encodedString, const int encodedStrLength);
-char HexToIntVal(const char c);
+char hexToIntVal(const char c);
 void convertHexToASCII(const char *hexString, const int hexStrLength, vector<uint8_t> *encodedAsciiChars);
 void decode(vector<uint8_t> &encodedAsciiChars, vector<uint8_t> &decodedAsciiChars, const uint8_t key);
-void calculateCharacterFrequencies(vector<uint8_t> &decodedAsciiChars);
-double computeFittingQuotient(vector<uint8_t> &decodedAsciiChars, const uint8_t key);
+double calculateFittingQuotient(vector<uint8_t> &decodedAsciiChars);
+uint8_t getMaxValueKey(map<uint8_t, double> &valueMap);
 
 int main()
 {
@@ -58,7 +59,6 @@ int main()
 ******************************************************************************/
 uint8_t findCipherKey(const char *encodedString, const int encodedStrLength)
 {
-    char key = -1;
     vector<uint8_t> encodedAsciiChars;
     vector<uint8_t> decodedAsciiChars;
 
@@ -77,12 +77,12 @@ uint8_t findCipherKey(const char *encodedString, const int encodedStrLength)
         }
         cout << endl;*/
 
-        //double keyScore = computeFittingQuotient(decodedAsciiChars, i);
-        //keyScores.insert(std::pair<char, double>(alphabet[i], keyScore));
+        double keyScore = calculateFittingQuotient(decodedAsciiChars);
+        keyScores.insert(std::pair<uint8_t, double>(i, keyScore));
     }
 
-    //find best scoring key in map and store in key variable
-
+    //find best scoring key in map and return it
+    uint8_t key = getMaxValueKey(keyScores);
     return key;
 }
 
@@ -94,7 +94,7 @@ uint8_t findCipherKey(const char *encodedString, const int encodedStrLength)
 * Returns: the integer equivalent of the char passed in.
 *
 ******************************************************************************/
-char HexToIntVal(const char c)
+char hexToIntVal(const char c)
 {
     if(c >= '0' && c <= '9') return c - '0';
     if(tolower(c) >= 'a' && tolower(c) <= 'f') return (c - 'a') + 10;
@@ -113,8 +113,8 @@ void convertHexToASCII(const char *hexString, const int hexStrLength, vector<uin
 {
     for(int i = 0, j = 0; i < hexStrLength; i++, j++)
     {
-        uint8_t c = HexToIntVal(hexString[i]);
-        encodedAsciiChars->push_back((c << 4) + HexToIntVal(hexString[++i]));
+        uint8_t c = hexToIntVal(hexString[i]);
+        encodedAsciiChars->push_back((c << 4) + hexToIntVal(hexString[++i]));
     }
 }
 
@@ -135,31 +135,46 @@ void decode(vector<uint8_t> &encodedAsciiChars, vector<uint8_t> &decodedAsciiCha
 }
 
 /******************************************************************************
-* Calculates the character frequency of each alphabet character in the cipher
-* text.
+* Calculates the fitting quotient of the decoded text and returns it.
 * 
 * decodedAsciiChars - vector containing the decoded ASCII characters
 * 
+* Returns: The fitting quotient of the current key.
+* 
 ******************************************************************************/
-void calculateCharacterFrequencies(vector<uint8_t> &decodedAsciiChars)
+double calculateFittingQuotient(vector<uint8_t> &decodedAsciiChars)
 {
-    //calculate the frequency of each letter in the alphabet in the encoded string and store in struct array
-    //TODO: Add logic
-
+    int textLength = decodedAsciiChars.size();
+    double numerator = 0;
     for(int i = 0; i < ALPHABET_LENGTH; i++)
     {
         double charFrequency = 0;
-        for(int j = 0; j < decodedAsciiChars.size(); j++)
+        for(int j = 0; j < textLength; j++)
         {
+            if(decodedAsciiChars[j] == ' ') numerator += 15;
             if(tolower(decodedAsciiChars[j]) == alphabet[i]) charFrequency++;
         }
+
+        charFrequency /= textLength;
+        double letterFreq = charFrequencies.find(alphabet[i])->second;
+        numerator += abs(charFrequencies.find(alphabet[i])->second - charFrequency);
     }
+
+    return numerator / ALPHABET_LENGTH;
 }
 
-double computeFittingQuotient(vector<uint8_t> &decodedAsciiChars, const uint8_t key)
+uint8_t getMaxValueKey(map<uint8_t, double> &valueMap)
 {
-    //use the calculated character frequencies to compute fitting quotient
-    //TODO: Add logic
+    uint8_t key = 0;
+    double max = 0;
+    for(auto iter = valueMap.begin(); iter != valueMap.end(); iter++)
+    {
+        if(iter->second > max)
+        {
+            key = iter->first;
+            max = iter->second;
+        }
+    }
 
-    return 0;
+    return key;
 }
