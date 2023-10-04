@@ -9,6 +9,8 @@ using std::cout;
 using std::endl;
 #include <map>
 using std::map;
+#include <vector>
+using std::vector;
 
 #define ALPHABET_LENGTH 26
 #define POSSIBLE_KEYS 256
@@ -19,28 +21,27 @@ static const map<char, double> charFrequency = { {'e', 12.702}, {'t', 9.056}, {'
                                                  {'u', 2.758}, {'m', 2.406}, {'w', 2.360}, {'f', 2.228}, {'g', 2.015}, {'y', 1.974},
                                                  {'p', 1.929}, {'b', 1.492}, {'v', 0.978}, {'k', 0.772}, {'j', 0.153}, {'x', 0.150},
                                                  {'q', 0.095}, {'z', 0.074} };
+static map<char, double> textCharFrequency = {};
 static map<char, double> keyScores = {};
 static const char *const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-unsigned char findCipherKey(const char *encodedString, const unsigned int encodedStrLength, char *&decodedString);
+uint8_t findCipherKey(const char *encodedString, const int encodedStrLength);
 char HexToIntVal(const char c);
-void convertHexToASCII(const char *hexString, const unsigned int encodedStrLength, char *charStr);
-void decode(const char *encodedAsciiStr, const unsigned int asciiStrLength, const unsigned char key, char *decodedStr);
-void calculateCharacterFrequencies(const char *encodedAsciiStr, const unsigned int asciiStrLength);
-double computeFittingQuotient(const char *encodedStr, const unsigned char key);
+void convertHexToASCII(const char *hexString, const int hexStrLength, vector<uint8_t> *encodedAsciiChars);
+void decode(vector<uint8_t> &encodedAsciiChars, vector<uint8_t> &decodedAsciiChars, const uint8_t key);
+void calculateCharacterFrequencies(vector<uint8_t> &decodedAsciiChars);
+double computeFittingQuotient(vector<uint8_t> &decodedAsciiChars, const uint8_t key);
 
 int main()
 {
     char encodedString[] = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-    unsigned int encodedStrLength = sizeof(encodedString) / sizeof(char) - 1;
+    int encodedStrLength = sizeof(encodedString) / sizeof(char) - 1;
 
-    char *decodedString = nullptr;
-    char key = findCipherKey(encodedString, encodedStrLength, decodedString);
+    char key = findCipherKey(encodedString, encodedStrLength);
 
     //TODO: remove need to pass in pointer for decoded string and just decode the string using the returned key after it is found
 
-    cout << "Encoded String: " << encodedString << "\nDecoded String: " << decodedString << "\nKey: " << key << endl;
-    free(decodedString);
+    //cout << "Encoded String: " << encodedString << "\nDecoded String: " << decodedString << "\nKey: " << key << endl;
 
     return 0;
 }
@@ -51,40 +52,36 @@ int main()
 * encodedString - the encoded cipher text
 * encodedStrLength - the length of the cipher string once converted from hex to 
 *                       ASCII
-* decodedString - pointer to where the decoded cipher text will be stored. 
-*                   must not be nullptr, and memory must be freed sometime 
-                    after function call
 *
 * Returns: the single-byte cipher key used to decode the cipher text.
 *
 ******************************************************************************/
-unsigned char findCipherKey(const char *encodedString, const unsigned int encodedStrLength, char *&decodedString)
+uint8_t findCipherKey(const char *encodedString, const int encodedStrLength)
 {
     char key = -1;
-    unsigned int asciiStrLength = (encodedStrLength / 2) + 1;
+    vector<uint8_t> encodedAsciiChars;
+    vector<uint8_t> decodedAsciiChars;
 
-    char *encodedAsciiStr = (char *)malloc(asciiStrLength);
-    if(encodedAsciiStr != nullptr)
+    convertHexToASCII(encodedString, encodedStrLength, &encodedAsciiChars);
+
+    for(int i = 0; i < POSSIBLE_KEYS; i++) //try each possible key and calculate scores
     {
-        memset(encodedAsciiStr, 0, asciiStrLength);
-        convertHexToASCII(encodedString, encodedStrLength, encodedAsciiStr);
+        if(!decodedAsciiChars.empty()) decodedAsciiChars.clear();
+        decode(encodedAsciiChars, decodedAsciiChars, i);
 
-        decodedString = (char *)malloc(asciiStrLength);
-        if(decodedString != nullptr)
+        //Debug print
+        /*cout << "Key: " << i << " ";
+        for(int i = 0; i < decodedAsciiChars.size(); i++)
         {
-            for(int i = 0; i < POSSIBLE_KEYS; i++) //try each possible key and calculate scores
-            {
-                memset(decodedString, 0, asciiStrLength);
-                decode(encodedAsciiStr, asciiStrLength, i, decodedString);
-                double keyScore = computeFittingQuotient(decodedString, i);
-                keyScores.insert(std::pair<char, double>(alphabet[i], keyScore));
-            }
+            cout << decodedAsciiChars[i];
         }
+        cout << endl;*/
 
-        //find best scoring key in map and store in key variable
-
-        free(encodedAsciiStr);
+        //double keyScore = computeFittingQuotient(decodedAsciiChars, i);
+        //keyScores.insert(std::pair<char, double>(alphabet[i], keyScore));
     }
+
+    //find best scoring key in map and store in key variable
 
     return key;
 }
@@ -109,42 +106,42 @@ char HexToIntVal(const char c)
 *
 * hexString - the encoded cipher text in hex form
 * hexStrLength - the length of hexString
-* encodedAsciiStr - the encoded cipher text in ASCII form
+* encodedAsciiChars - the encoded cipher text in ASCII form
 *
 ******************************************************************************/
-void convertHexToASCII(const char *hexString, const unsigned int hexStrLength, char *encodedAsciiStr)
+void convertHexToASCII(const char *hexString, const int hexStrLength, vector<uint8_t> *encodedAsciiChars)
 {
     for(int i = 0, j = 0; i < hexStrLength; i++, j++)
     {
-        unsigned char c = HexToIntVal(hexString[i]);
-        encodedAsciiStr[j] = (c << 4) + HexToIntVal(hexString[++i]);
+        uint8_t c = HexToIntVal(hexString[i]);
+        encodedAsciiChars->push_back((c << 4) + HexToIntVal(hexString[++i]));
     }
 }
 
 /******************************************************************************
-* XORs the encoded string with a single byte key
+* XORs each character of the encoded string with a single byte key.
 *
-* encodedAsciiStr - the encoded string in ASCII form
-* asciiStrLength - the length of encodedAsciiStr
+* encodedAsciiChars - vector containing the encoded string in ASCII form
+* decodedAsciiChars - vector where the decoded string is to be stored
 * key - the byte key used to decode the string
-* decodedStr - where the decoded string is to be stored
 *
 ******************************************************************************/
-void decode(const char *encodedAsciiStr, const unsigned int asciiStrLength, const unsigned char key, char *decodedStr)
+void decode(vector<uint8_t> &encodedAsciiChars, vector<uint8_t> &decodedAsciiChars, const uint8_t key)
 {
-    for(int i = 0; i < asciiStrLength; i++)
+    for(int i = 0; i < encodedAsciiChars.size(); i++)
     {
-        decodedStr[i] = encodedAsciiStr[i] ^ key;
+        decodedAsciiChars.push_back(encodedAsciiChars[i] ^ key);
     }
 }
 
 /******************************************************************************
 * Calculates the character frequency of each alphabet character in the cipher
-* text
+* text.
 * 
-*
+* decodedAsciiChars - vector containing the decoded ASCII characters
+* 
 ******************************************************************************/
-void calculateCharacterFrequencies(const char *encodedAsciiStr, const unsigned int asciiStrLength)
+void calculateCharacterFrequencies(vector<uint8_t> &decodedAsciiChars)
 {
     //calculate the frequency of each letter in the alphabet in the encoded string and store in struct array
     //TODO: Add logic
@@ -152,14 +149,14 @@ void calculateCharacterFrequencies(const char *encodedAsciiStr, const unsigned i
     for(int i = 0; i < ALPHABET_LENGTH; i++)
     {
         double charFrequency = 0;
-        for(int j = 0; j < asciiStrLength; j++)
+        for(int j = 0; j < decodedAsciiChars.size(); j++)
         {
-            if(tolower(encodedAsciiStr[j]) == alphabet[i]) charFrequency++;
+            if(tolower(decodedAsciiChars[j]) == alphabet[i]) charFrequency++;
         }
     }
 }
 
-double computeFittingQuotient(const char *encodedStr, const unsigned char key)
+double computeFittingQuotient(vector<uint8_t> &decodedAsciiChars, const uint8_t key)
 {
     //use the calculated character frequencies to compute fitting quotient
     //TODO: Add logic
