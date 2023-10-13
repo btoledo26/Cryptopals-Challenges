@@ -107,7 +107,8 @@ void decryptSingleByteXOR(const char *encryptedString, const int encryptedStrLen
 char hexToIntVal(const char c)
 {
     if(c >= '0' && c <= '9') return c - '0';
-    if(tolower(c) >= 'a' && tolower(c) <= 'f') return (c - 'a') + 10;
+    if(c >= 'a' && c <= 'f') return (c - 'a') + 10;
+    if(c >= 'A' && c <= 'F') return (c - 'A') + 10;
     return -1;
 }
 
@@ -124,6 +125,8 @@ void convertHexToASCII(const char *hexString, const int hexStrLength, vector<uin
     for(int i = 0, j = 0; i < hexStrLength - 1; i++, j++)
     {
         uint8_t c = hexToIntVal(hexString[i]);
+        uint8_t a = hexToIntVal(hexString[i + 1]);
+        uint8_t b = (c << 4) + hexToIntVal(hexString[i + 1]);
         encryptedAsciiChars->push_back((c << 4) + hexToIntVal(hexString[++i]));
     }
 }
