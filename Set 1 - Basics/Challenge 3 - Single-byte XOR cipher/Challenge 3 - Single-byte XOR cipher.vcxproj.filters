@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Single-byte_XOR.cpp">
+    <ClCompile Include="single-byte_xor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Test.cpp">
+    <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Single-byte_XOR.h">
+    <ClInclude Include="single-byte_xor.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

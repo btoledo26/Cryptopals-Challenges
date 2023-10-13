@@ -3,7 +3,7 @@
 using std::cout;
 using std::endl;
 
-#include "Single-byte_XOR.h"
+#include "single-byte_xor.h"
 
 void test1();
 void test2();
@@ -13,7 +13,7 @@ void test5();
 
 int main()
 {
-    test1();
+    //test1();
     //test2();
     //test3();
     //test4();
@@ -21,6 +21,12 @@ int main()
 
     return 0;
 }
+
+//Encrypts text in ASCII using decimal key
+//https://www.cryptool.org/en/cto/xor
+
+//Converts ASCII to hex
+//https://www.rapidtables.com/convert/number/ascii-to-hex.html
 
 void test1()
 {
@@ -42,7 +48,7 @@ void test2()
     uint8_t key = findSingleByteXORCipherKey(encryptedString, encryptedStrLength);
     decryptSingleByteXOR(encryptedString, encryptedStrLength, key);
 
-    //assert(key == 55);
+    assert(key == 55);
     cout << "Passed Test 2\n" << endl;
 }
 
@@ -54,7 +60,7 @@ void test3()
     uint8_t key = findSingleByteXORCipherKey(encryptedString, encryptedStrLength);
     decryptSingleByteXOR(encryptedString, encryptedStrLength, key);
 
-    //assert(key == 67);
+    assert(key == 67);
     cout << "Passed Test 3\n" << endl;
 }
 
@@ -66,7 +72,7 @@ void test4()
     uint8_t key = findSingleByteXORCipherKey(encryptedString, encryptedStrLength);
     decryptSingleByteXOR(encryptedString, encryptedStrLength, key);
 
-    //assert(key == 30);
+    assert(key == 30);
     cout << "Passed Test 4\n" << endl;
 }
 

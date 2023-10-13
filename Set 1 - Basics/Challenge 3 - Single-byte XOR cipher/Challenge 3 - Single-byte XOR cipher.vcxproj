@@ -127,11 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Single-byte_XOR.cpp" />
-    <ClCompile Include="Test.cpp" />
+    <ClCompile Include="single-byte_xor.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Single-byte_XOR.h" />
+    <ClInclude Include="single-byte_xor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
