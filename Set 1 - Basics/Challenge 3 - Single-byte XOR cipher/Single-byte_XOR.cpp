@@ -45,12 +45,12 @@ uint8_t findSingleByteXORCipherKey(const char *encryptedString, const int encryp
         decryptSingleByteXOR(encryptedAsciiChars, decryptedAsciiChars, i);
 
         //Debug print
-        /*cout << "Key: " << i << " ";
+        cout << "Key: " << i << " ";
         for(int i = 0; i < decryptedAsciiChars.size(); i++)
         {
             cout << decryptedAsciiChars[i];
         }
-        cout << endl;*/
+        cout << endl;
 
         double keyScore = calculateFittingQuotient(decryptedAsciiChars);
         keyScores.insert(std::pair<uint8_t, double>(i, keyScore));
@@ -120,7 +120,7 @@ char hexToIntVal(const char c)
 *
 ******************************************************************************/
 void convertHexToASCII(const char *hexString, const int hexStrLength, vector<uint8_t> *encryptedAsciiChars)
-{
+{//TODO: correct this function, doesn't get correct output in some cases
     for(int i = 0, j = 0; i < hexStrLength - 1; i++, j++)
     {
         uint8_t c = hexToIntVal(hexString[i]);
